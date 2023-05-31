@@ -8,7 +8,7 @@ class RoomManager {
 
     protected $myCurl;
 
-    protected $apiHost = "http://103.188.166.50";
+    protected $apiHost = "http://localhost";
 
     public function __construct() {
         $this->rooms = [];

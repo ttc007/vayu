@@ -1,5 +1,5 @@
 // Ở app cha
-var socket = new WebSocket('ws://http://103.188.166.50:8080');
+var socket = new WebSocket('ws://localhost:8080');
 var userId = $("#userId").val();
 var roomId = $("#roomId").val();
 
@@ -175,8 +175,11 @@ new Vue({
 			    	this.notification = jsonData.notification;
 				    break;
 			    case 'notificationWaitReady':
-			    	this.isOpponentWaitReady = true;
-			    	this.opponentWaitReadyTime = jsonData.countDown;
+			    	if (this.roomStatus != 'playing') {
+			    		this.isOpponentWaitReady = true;
+			    		this.opponentWaitReadyTime = jsonData.countDown;
+			    	}
+			    	
 				    break;
 			    case 'disRoom':
 			    	this.roomId = 0;
