@@ -33,7 +33,7 @@
   background: url(../img/background.png) center no-repeat;
   border-radius: 5px;
   position: relative;
-  font-size: 1em;
+  font-size: 14px;
 }
 
 .player-info {
@@ -62,7 +62,7 @@
   float: left;
   width: 45%;
   border-radius: 5px;
-  padding:8px;
+  padding:4px;
   background: #e6f2ff;
   border: 1px solid #000;
   height:85%;
@@ -85,7 +85,7 @@ body {
 .opponent-content {
   float:right;
   border-radius: 5px;
-  padding:8px;
+  padding:4px;
   background: #fff9db;
   margin: 10px 0;
   width: 45%;
@@ -261,7 +261,7 @@ h1 {
 }
 
 .game-mode h3 {
-  margin-top: 10px;
+  margin:0;
 }
 
 .container .elo {
