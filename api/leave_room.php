@@ -47,6 +47,11 @@ try {
       $sql = "UPDATE user SET elo = ? WHERE id = ?";
       $statement = $conn->prepare($sql);
       $statement->execute([$opponentElo, $opponent['user_id']]);
+    } else if ($roomUser['status'] == "wait") {
+      // Xóa tin nhắn
+      $sql = "UPDATE room SET messages = null WHERE id = $roomId";
+      $statement = $conn->prepare($sql);
+      $statement->execute();
     }
   }
 
