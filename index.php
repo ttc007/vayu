@@ -115,6 +115,6 @@ try {
   <script src="asset/js/component/roomComponent_.js"></script>
   <script src="asset/js/component/popupComponent_.js"></script>
   <script src="asset/js/component/chatComponent_.js"></script>
-  <script src="asset/js/index_.js"></script>
+  <script src="asset/js/index.js"></script>
 </body>
 </html>
