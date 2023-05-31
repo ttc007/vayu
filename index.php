@@ -38,10 +38,15 @@ try {
 <html>
 <head>
 	<title>Cờ vây online</title>
-  <link rel="icon" type="image/x-icon" href="asset/img/anh1.ico">
+  	<link rel="icon" type="image/x-icon" href="asset/img/anh1.ico">
 	<link rel="stylesheet" type="text/css" href="asset/css/style.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
  	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+
+ 	<meta property="og:title" content="Vayu Game - Trải nghiệm cờ vây online độc đáo">
+	<meta property="og:description" content="Vayu Game mang đến cho bạn trò chơi cờ vây trực tuyến độc đáo và hấp dẫn. Thử thách bản thân với các nước cờ chiến thuật, rèn luyện trí tuệ và thể hiện khả năng tư duy chiến lược của bạn. Hãy tham gia ngay để trở thành nhà vô địch cờ vây!">
+	<meta property="og:image" content="asset/img/room_playing.png">
+	<meta property="og:url" content="http://vayugovn.com">
 
 	<meta charset="UTF-8">
 </head>
