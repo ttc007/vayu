@@ -47,6 +47,16 @@ try {
       $sql = "UPDATE user SET elo = ? WHERE id = ?";
       $statement = $conn->prepare($sql);
       $statement->execute([$opponentElo, $opponent['user_id']]);
+
+      $response = [
+        "title" => $notification,
+        "isDicken" => false,
+        "win" => $win,
+        "lost" => $lost,
+        "win_color" => $opponent['color'],
+        "lost_color" => $roomUser['color']
+      ];
+      echo json_encode($response);
     } else if ($roomUser['status'] == "wait") {
       // Xóa tin nhắn
       $sql = "UPDATE room SET messages = null WHERE id = $roomId";
@@ -64,15 +74,7 @@ try {
   // Đóng kết nối cơ sở dữ liệu
   $conn = null;
 
-  $response = [
-    "title" => $notification,
-    "isDicken" => false,
-    "win" => $win,
-    "lost" => $lost,
-    "win_color" => $opponent['color'],
-    "lost_color" => $roomUser['color']
-  ];
-  echo json_encode($response);
+
 } catch(PDOException $e) {
   echo "Lỗi kết nối cơ sở dữ liệu: " . $e->getMessage();
 }
