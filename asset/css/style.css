@@ -5,6 +5,7 @@
     background: url("../img/banco.jpg") no-repeat center center;
     border-radius: 5px;
     position:relative;
+    margin: 10px auto;
 }
 
 .leave-room-btn {
@@ -24,30 +25,29 @@
 .game-container {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+/*  justify-content: space-between;*/
   align-items: flex-start;
   width: 480px;
-  margin: 5px auto;
+  margin: 1px auto;
   border: 1px solid #ccc;
   padding: 0 20px;
   background: url(../img/background.png) center no-repeat;
   border-radius: 5px;
   position: relative;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .player-info {
   width: 100%;
-  padding-top: 10px;
-  margin-bottom: 10px;
+  padding-top: 2px;
   height:100px;
 }
 
 .opponent-info {
   text-align: right;
   width: 100%;
-  margin-bottom: 5px;
-  height:120px;
+  margin-bottom: 0px;
+  height:100px;
 }
 
 .play-name {
@@ -85,12 +85,12 @@ body {
 .opponent-content {
   float:right;
   border-radius: 5px;
-  padding:4px;
+  padding:6px;
   background: #fff9db;
-  margin: 10px 0;
+  margin: 5px 0px;
   width: 45%;
   border: 1px solid #000;
-  height:70%;
+/*  height:70%;*/
 }
 
 #readyButton {
