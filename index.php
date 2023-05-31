@@ -111,10 +111,10 @@ try {
   	></room-component>
 	</div>
 
-  <script src="asset/js/component/indexComponent_.js"></script>
-  <script src="asset/js/component/roomComponent_.js"></script>
-  <script src="asset/js/component/popupComponent_.js"></script>
-  <script src="asset/js/component/chatComponent_.js"></script>
+  <script src="asset/js/component/indexComponent.js"></script>
+  <script src="asset/js/component/roomComponent.js"></script>
+  <script src="asset/js/component/popupComponent.js"></script>
+  <script src="asset/js/component/chatComponent.js"></script>
   <script src="asset/js/index.js"></script>
 </body>
 </html>
