@@ -4,15 +4,12 @@ var userId = $("#userId").val();
 var roomId = $("#roomId").val();
 
 socket.onopen = function() {
-  console.log('Kết nối WebSocket đã được thiết lập.');
   socket.send(JSON.stringify({ action: 'updateConn', userId: userId }));
   socket.send(JSON.stringify({ action: 'roomUpdate', roomId: roomId }));
   socket.send(JSON.stringify({ action: 'getUserUpdate', userId: userId }));
 };
 
-socket.onclose = function(event) {
-    console.log('Kết nối WebSocket đã đóng.');
-};
+socket.onclose = function(event) {};
 
 new Vue({
     el: '#app',

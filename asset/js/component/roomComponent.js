@@ -696,7 +696,6 @@ Vue.component('room-component', {
           return true; // Có khí
         }
 
-        // console.log(nextMove.col, nextMove.row, this.user_color);
         if (this.isPositionOccupiedByAlly(nextMove.col, nextMove.row, this.user_color)) {
           if (areaCheck[`${nextMove.col}_${nextMove.row}`]) {
             continue;
@@ -1114,8 +1113,6 @@ Vue.component('room-component', {
     getLines(area, includesPoints) {
       var keys = Object.keys(area);
 
-      if (keys[0] == '2_4') console.log(area, includesPoints);
-
       var lines = {};
       if (includesPoints.length == 0) return lines;
 
@@ -1321,7 +1318,6 @@ Vue.component('room-component', {
         }
       }
 
-      if (keys[0] == '5_20') console.log(area, corners, innerPositions);
       return innerPositions;
     },
     validArea(areasUnique) {
@@ -1396,7 +1392,6 @@ Vue.component('room-component', {
         }
       }
 
-      console.log()
       return areasUnique;
     },
     checkCanMove() {

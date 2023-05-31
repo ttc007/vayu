@@ -1,5 +1,10 @@
 <?php
     session_start();
+    $error = null;
+    if (isset($_SESSION["error"])) {
+        $error = $_SESSION["error"];
+        unset($_SESSION["error"]);
+    }
 ?>
 <!DOCTYPE html>
 <html>
@@ -7,6 +12,7 @@
     <title>Cờ vây online</title>
     <link rel="icon" type="image/x-icon" href="asset/img/anh1.ico">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <style type="text/css">
         .login-form input {
           margin-bottom: 10px;
@@ -22,6 +28,7 @@
           padding: 20px;
           margin-top: 150px;
           border-radius: 5px;
+          position: relative;
         }
 
         label {
@@ -48,6 +55,8 @@
             margin: 5px auto;
             border: none;
             border-radius: 5px;
+            cursor:pointer;
+            width:120px;
         }
 
         .avatar-container {
@@ -87,7 +96,12 @@
             content: "\2714";
             margin-right: 5px;
         }
-
+        .error-container {
+            position:absolute;
+            top: 140px;
+            left:0px;
+            width:100%;
+        }
         .error-message {
             color: red;
             background-color: #ffe6e6;
@@ -95,33 +109,115 @@
             border: 1px solid #ff9999;
             border-radius: 5px;
             margin-bottom: 10px;
+            transition: opacity 1s ease-in-out;
+            opacity: 1;
+            text-align:center;
+            margin: 0 auto;
+            width: 85%;
+        }
+
+        .back-btn {
+            position: absolute;
+            top:15px;
+            left: 15px;
+            background: #ddd;
+            padding: 4px 7px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .register-link {
+            color: blue;
+            cursor: pointer;
+        }
+
+        .loading-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          /* Thêm các thuộc tính CSS khác để tạo hiệu ứng phù hợp */
+        }
+
+        .loading-overlay div {
+          background-color: #fff;
+          border: 1px solid #ccc;
+          padding: 30px 10px;
+          border-radius: 5px;
+          text-align:center;
         }
     </style>
 </head>
 <body>
     <div id="app">
+        <input type="hidden" id="errorMessage" value="<?php echo $error; ?>">
         <login-component v-if="isLogin"
-        :error_message="errorMessage"
-        :success_message="successMessage"
+            :error_message="errorMessage"
+            :success_message="successMessage"
+            @view_register="viewRegister"
+            @view_forgot="viewForgot"
         ></login-component>
 
         <register-component v-if="isRegister"
-        :error_message="errorMessage"
-        :success_message="successMessage"
+            @view_login="viewLogin"
+            @register_success="registerSuccess"
         ></register-component>
+
+        <forgot-component v-if="isForgot"
+            @view_login="viewLogin"
+            @register_success="registerSuccess"
+        ></forgot-component>
     </div>
-    <script src="asset/js/component/login/loginComponent.js"></script>
+    <script src="asset/js/component/login/loginComponent_.js"></script>
+    <script src="asset/js/component/login/registerComponent_.js"></script>
+    <script src="asset/js/component/login/forgotComponent_.js"></script>
     <script type="text/javascript">
+        const errorMessage = $("#errorMessage").val();
         new Vue({
             el: '#app',
             data: {
-                errorMessage:null,
+                errorMessage:errorMessage,
                 successMessage:null,
                 isLogin: true,
                 isRegister:false,
                 isForgot:false
             },
-            methods
+            mounted() {
+                setTimeout(() => {
+                    this.errorMessage = null;
+                }, 2000);
+            },
+            methods: {
+                viewRegister() {
+                    this.isRegister = true;
+                    this.isLogin = false;
+                    this.forgit = false;
+                },
+                viewLogin() {
+                    this.isLogin = true;
+                    this.isRegister = false;
+                    this.isForgot = false;
+                },
+                viewForgot() {
+                    this.isLogin = false;
+                    this.isRegister = false;
+                    this.isForgot = true;
+                },
+                registerSuccess(successMessage) {
+                    this.viewLogin();
+                    this.successMessage = successMessage;
+
+                    setTimeout(() => {
+                        this.successMessage = null;
+                    }, 5000);
+                }
+            }
         });
     </script>
 </body>

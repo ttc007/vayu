@@ -8,8 +8,10 @@ Vue.component('login-component', {
         </div>
 
         <h2 class='title'>Đăng nhập</h2>
+          <div class="error-container">
             <p class="error-message" v-if='error_message'>{{error_message}}</p>
             <p class="success-message" v-if='success_message'>{{success_message}}</p>
+          </div>
         <?php endif; ?>
         <div class="padding-left">
             <label for="username">Tên người dùng</label>
@@ -22,12 +24,17 @@ Vue.component('login-component', {
         </div>
 
         <div class="form-footer">
-            <a href="forgot_form.php">Quên mật khẩu?</a> | 
-            <a href="register_form.php" class="register-link">Đăng ký</a>
+            <a @click="viewForgot" class="register-link">Quên mật khẩu?</a> | 
+            <a @click="viewRegister" class="register-link">Đăng ký</a>
         </div>
     </form>
   `,
   methods: {
-    
+    viewRegister() {
+      this.$emit('view_register');
+    },
+    viewForgot() {
+      this.$emit('view_forgot');
+    }
   }
 });

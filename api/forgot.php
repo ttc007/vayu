@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-require 'vendor/autoload.php';
-require 'connectDB.php';
+require '../vendor/autoload.php';
+require '../connectDB.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -15,9 +15,7 @@ $stmt->execute([$email]);
 $user = $stmt->fetch();
 
 if (!$user) {
-	$_SESSION["error"] = "Email không tồn tại.";
-    header("Location: login_form.php");
-    exit();
+	$response["error"] = "Email không tồn tại.";
 }
 
 $password = $user['password'];
@@ -44,7 +42,8 @@ $mail->Body = 'Mật khẩu của bạn là: ' . $password;
 // Gửi email
 $mail->send();
 
-
-$_SESSION["success"] = "Đã gởi mật khẩu. Vui lòng kiểm tra mail.";
-header("Location: login_form.php");
+if ($user) {
+    $response["success"] = "Đã gởi mật khẩu. Vui lòng kiểm tra mail.";
+}
+echo json_encode($response);
 exit();
