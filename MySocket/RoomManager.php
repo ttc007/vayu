@@ -190,6 +190,8 @@ class RoomManager {
 
         if ($actionRoom != 'giveWay') {
             $action = "move";
+        } else {
+            $action = null;
         }
 
         $this->roomUpdate($data['roomId'], null, $notification, $action);

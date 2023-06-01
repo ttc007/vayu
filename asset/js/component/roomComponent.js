@@ -271,6 +271,15 @@ Vue.component('room-component', {
       resultTitle:null
     };
   },
+  created() {
+    // Lấy kích thước chiều rộng của màn hình
+      const screenWidth = window.innerWidth;
+
+    if (screenWidth < 481) {
+      this.cellSize = screenWidth / 21;
+      console.log(this.cellSize);
+    }
+  },
   mounted() {
     // Cập nhật kích thước canvas
     this.updateCanvasSize();
@@ -504,9 +513,9 @@ Vue.component('room-component', {
 
           if (i == moves.length - 1) {
             ctx.beginPath();
-            ctx.arc(x, y, this.cellSize / 2 - 1, 0, 2 * Math.PI);
+            ctx.arc(x, y, this.cellSize / 4 - 1, 0, 2 * Math.PI);
             ctx.lineWidth = 2;
-            ctx.strokeStyle = "red";
+            ctx.strokeStyle = player == 2 ? "black" : "white";
             ctx.stroke();
             ctx.closePath();
           }

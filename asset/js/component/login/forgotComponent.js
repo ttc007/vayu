@@ -13,9 +13,9 @@ Vue.component('forgot-component', {
 
         <?php endif; ?>
 
-        <div class="center">
-            <label for="email" style="width:60px;padding-left:55px">Email</label>
-            <input type="email" v-model="email" style="width:215px" name="email">
+        <div class="center forgot-center">
+            <label for="email" style="width:60px;padding-left:55px" class="forgot-label-email">Email</label>
+            <input type="email" v-model="email" style="width:215px" name="email" class="forgot-input-email">
 
             <a class="button" @click="forgot">Gửi yêu cầu</a>
             <a @click="viewLogin" class="back-btn"><img src="asset/img/back-arrow.png" width='20'></a>

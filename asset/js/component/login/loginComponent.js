@@ -20,7 +20,7 @@ Vue.component('login-component', {
             <label for="password">Mật khẩu</label>
             <input type="password" id="password" name="password" required><br>
 
-            <label></label><button class="button">Đăng nhập</button>
+            <button class="button">Đăng nhập</button>
         </div>
 
         <div class="form-footer">

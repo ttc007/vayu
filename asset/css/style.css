@@ -2,7 +2,7 @@
   font-family: Pacifico;
 }
 .canvas-container {
-    background: url("../img/banco.jpg") no-repeat center center;
+    background: url("../img/go.jpg") no-repeat center center;
     border-radius: 5px;
     position:relative;
     margin: 6px auto;
@@ -792,4 +792,116 @@ h1.name {
   text-align: center;
   height: 100px;
   padding-top: 15px;
+}
+
+@media (max-width: 821px){
+  .container {
+    width: 100%;
+    margin: 0;
+  }
+
+  #btnListRoom {
+    width: 96%;
+    top: 25%;
+  }
+
+  .avatar {
+    margin: 70px auto 20px;
+  }
+
+  .container .elo {
+    margin-top: 10px;
+  }
+
+  .bottom-content {
+    bottom: 4%;
+  }
+
+  .logout {
+    margin-top: 10%;
+  }
+
+  .game-container {
+    width: 100%;
+    overflow:hidden;
+    padding:8px;
+  }
+
+  .chat-component {
+    left: 8px;
+    height: 300px;
+    background: #ddddddba;
+    width: 400px;
+  }
+}
+
+@media (max-width: 481px) {
+  .avatar {
+      margin: 0;
+  }
+
+  #btnListRoom {
+      width: 90%;
+      top: 15%;
+  }
+
+  .chat-component {
+    left: 8px;
+    height: 150px;
+    background: #ddddddba;
+    width: 200px;
+  }
+
+  .user-color .color {
+    width: 25px;
+    height: 25px;
+  }
+
+  .timer {
+    width: 25px;
+    height: 25px;
+  }
+
+  .play-content-info {
+    width: 90px;
+    font-size: 10px;
+  }
+
+  .give-btn {
+    width: 28px;
+    height: 28px;
+    margin-left: 5px;
+  }
+
+  .opponent-content-info {
+    width: 90px;
+    font-size: 10px;
+  }
+
+  .opponent-color .color {
+    width: 25px;
+    height: 25px;
+    margin-right: 0;
+  }
+
+  .opponent-color {
+    margin-right: 0;
+  }
+
+  .opponent-content .give-btn {
+    margin-left: 0px;
+    margin-right: 8px;
+  }
+
+  .surrender-btn {
+    margin-top: 10px;
+  }
+
+  .opponent-score-container {
+    margin-top: 5px;
+  }
+
+  .result-request {
+    margin-top: 10px;
+  }
 }
