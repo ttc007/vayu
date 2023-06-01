@@ -273,11 +273,10 @@ Vue.component('room-component', {
   },
   created() {
     // Lấy kích thước chiều rộng của màn hình
-      const screenWidth = window.innerWidth;
+    const screenWidth = window.innerWidth;
 
     if (screenWidth < 481) {
       this.cellSize = screenWidth / 21;
-      console.log(this.cellSize);
     }
   },
   mounted() {

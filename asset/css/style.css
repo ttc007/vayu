@@ -678,7 +678,6 @@ h1.name {
   display: flex;
   flex-direction: column;
   height: 300px;
-  border: 1px solid #ccc;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -687,6 +686,7 @@ h1.name {
   flex-grow: 1;
   padding: 10px;
   overflow-y: auto;
+  background: #dddddda8;
 }
 
 .chat-messages ul {
@@ -734,7 +734,6 @@ h1.name {
   position: absolute;
   left: calc(50% + 280px); /* Điều chỉnh giá trị 400px cho vị trí phù hợp */
   bottom: 0px;
-  background: url(../img/background.png);
 }
 
 .result-container {
@@ -794,6 +793,15 @@ h1.name {
   padding-top: 15px;
 }
 
+.chat-icon {
+  display:none;
+}
+
+.chat-messages ul {
+  height: 232px;
+  overflow-y: auto;
+}
+
 @media (max-width: 821px){
   .container {
     width: 100%;
@@ -830,12 +838,35 @@ h1.name {
   .chat-component {
     left: 8px;
     height: 300px;
-    background: #ddddddba;
-    width: 400px;
+    width: 90%;
+  }
+
+  .chat-icon {
+    display:block;
+    width:80px;
+    background: #ddd;
+    border-radius: 25px;
+    position: absolute;
+    right:-44px;
+    top:0;
+  }
+
+  .chat-component  {
+      height: 440px;
+      width:85%;
+
   }
 }
 
 @media (max-width: 481px) {
+  .chat-icon {
+    right: -22px;
+  }
+  .chat-icon img{
+    width:40px;
+    height:40px;
+  }
+
   .avatar {
       margin: 0;
   }
@@ -848,8 +879,7 @@ h1.name {
   .chat-component {
     left: 8px;
     height: 150px;
-    background: #ddddddba;
-    width: 200px;
+    width: 270px;
   }
 
   .user-color .color {
@@ -903,5 +933,9 @@ h1.name {
 
   .result-request {
     margin-top: 10px;
+  }
+
+  .chat-messages ul {
+    height: 30%;
   }
 }

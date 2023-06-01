@@ -2,28 +2,43 @@ Vue.component('chat-component', {
   props: ['messages', 'room_id', 'user_name'],
   
   template: `
-    <div class="chat">
-      <div class="chat-messages">
-        <ul>
-          <li v-for="message in messagesArr" :key="message.id">
-            <span class="message-sender" v-if="message.sender!=user_name">{{ message.sender }}:</span>
-            <span class="message-sender" v-if="message.sender==user_name">Bạn:</span>
-            <span class="message-content">{{ message.content }}</span>
-          </li>
-        </ul>
+    <div>
+      <div class="chat-icon" @click="toggleChatForm" v-show="isShowChatIcon">
+        <img src="asset/img/chat3.png" class="chat-icon" title="Bật tắt chat form">
       </div>
-      <div class="chat-input">
-        <input type="text" v-model="newMessage" @keyup.enter="sendMessage" 
-        placeholder="Nhập tin nhắn..." maxlength="50" >
-        <button @click="sendMessage">Gửi</button>
+      <div class="chat">
+        <div class="chat-messages" v-if="isShowChatForm">
+          <ul>
+            <li v-for="message in messagesArr" :key="message.id">
+              <span class="message-sender" v-if="message.sender!=user_name">{{ message.sender }}:</span>
+              <span class="message-sender" v-if="message.sender==user_name">Bạn:</span>
+              <span class="message-content">{{ message.content }}</span>
+            </li>
+          </ul>
+
+          <div class="chat-input">
+            <input type="text" v-model="newMessage" @keyup.enter="sendMessage" 
+            placeholder="Nhập tin nhắn..." maxlength="50" >
+            <button @click="sendMessage">Gửi</button>
+          </div>
+        </div>
       </div>
     </div>
   `,
   data() {
     return {
       newMessage: '',
-      messagesArr:[]
+      messagesArr:[],
+      isShowChatForm: true,
+      isShowChatIcon: false
     };
+  },
+  created() {
+    const screenWidth = window.innerWidth;
+    if (screenWidth < 821) {
+      this.isShowChatIcon = true;
+      this.isShowChatForm = false;
+    }
   },
   mounted() {
     if (this.messages != '') {
@@ -38,6 +53,13 @@ Vue.component('chat-component', {
     }
   },
   methods: {
+    toggleChatForm () {
+      if (this.isShowChatForm) {
+        this.isShowChatForm = false;
+      } else {
+        this.isShowChatForm = true;
+      }
+    },
     sendMessage() {
       if (this.newMessage) {
         var roomId = this.room_id;
