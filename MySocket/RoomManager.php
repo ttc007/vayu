@@ -83,13 +83,69 @@ class RoomManager {
     }
 
     public function updateTimer($roomId) {
-        $url = $this->apiHost . '/api/update_timer.php';
-        $data = array(
-            'roomId' => $roomId,
-        );
-        $response = $this->myCurl->postRequest($url, $data);
+        if (isset($this->rooms[$roomId]['timer']) && $this->rooms[$roomId]['timer'] <= time()) {
+            if (isset($this->rooms[$roomId]['turn_playing'])) {
+                $this->rooms[$roomId]['turn_playing'] = $this->rooms[$roomId]['turn_playing'] == 1 ? 2 : 1;
+            } else {
+                $this->rooms[$roomId]['turn_playing'] = 1;
+            }
 
-        $this->roomUpdate($roomId);
+            $this->rooms[$roomId]['timer'] = time() + 20;
+            $timer = $this->rooms[$roomId]['timer'];
+            $turnPlaying = $this->rooms[$roomId]['turn_playing'];
+            $timerServer = time();
+            $moves = isset($this->rooms[$roomId]['moves']) ? $this->rooms[$roomId]['moves'] : null;
+            $areas = isset($this->rooms[$roomId]['areas']) ? $this->rooms[$roomId]['areas'] : [];
+
+            $data = [
+                'action' => 'updateTurnPlaying', 
+                'turnPlaying' => $turnPlaying,
+                'timer' => $timer,
+                'timerServer' => $timerServer,
+                'moves' => $moves
+            ];
+
+            if (isset($this->rooms[$roomId]['users'])) {
+                foreach($this->rooms[$roomId]['users'] as $userIdInArr => $userData) {
+                    if (isset($this->clients[$userIdInArr])) {
+                        $client = $this->clients[$userIdInArr];
+                        $client->send(json_encode($data));
+                    }
+                }
+            }
+        }
+    }
+
+    public function getTurnPlaying($userId, $roomId) {
+        $turnPlaying = isset($this->rooms[$roomId]['turn_playing']) ? $this->rooms[$roomId]['turn_playing'] : null;
+        $timer = isset($this->rooms[$roomId]['timer']) ? $this->rooms[$roomId]['timer'] : null;
+        $timerServer = time();
+        $moves = isset($this->rooms[$roomId]['moves']) ? $this->rooms[$roomId]['moves'] : null;
+        $areas = isset($this->rooms[$roomId]['areas']) ? $this->rooms[$roomId]['areas'] : null;
+
+        $player = isset($this->rooms[$roomId]['player']) ? $this->rooms[$roomId]['player'] : null;
+        $opponent = isset($this->rooms[$roomId]['opponent']) ? $this->rooms[$roomId]['opponent'] : null;
+
+        if (isset($this->clients[$userId])) {
+            $client = $this->clients[$userId];
+            $client->send(json_encode([
+                'action' => 'updateTurnPlaying', 
+                'turnPlaying' => $turnPlaying,
+                'timer' => $timer,
+                'timerServer' => $timerServer,
+                'moves' => $moves,
+                'areas' => $areas,
+                'player' => $player,
+                'opponent' => $opponent
+            ]));
+        }
+    }
+
+    public function getServerTime($userId) {
+        $timeServer = time();
+        $timeData = ['action' => 'timeServerUpdate', 'timeServer' => $timeServer];
+        $client = $this->clients[$userId];
+        $client->send(json_encode($timeData));
     }
 
     public function checkRoom($userId, $userElo) {
@@ -102,7 +158,16 @@ class RoomManager {
 
         $data = json_decode($response, true);
 
-        $this->roomUpdate($data['roomId']);
+        $roomId = $data['roomId'];
+        $color = $data['color'];
+
+        $this->roomUpdate($roomId);
+
+        $this->rooms[$roomId]['users'][$userId] = [
+            'color' => $color,
+            'move_count' => 0,
+            'score' => 0
+        ];
     }
 
     public function getListRoom($userId) {
@@ -111,7 +176,6 @@ class RoomManager {
 
         $data = json_decode($response, true);
 
-        var_dump($response);
         $sendData = ['action' => 'listRoomUpdate', 'data' => $data];
         $client = $this->clients[$userId];
         $client->send(json_encode($sendData));
@@ -126,6 +190,10 @@ class RoomManager {
         );
         $response = $this->myCurl->postRequest($url, $data);
         $this->roomUpdate($data['roomId']);
+
+        $this->rooms[$roomId]['users'][$userId] = [
+            'color' => 3
+        ];
     }
 
     public function leaveRoom($userId, $roomId, $notification) {
@@ -148,6 +216,8 @@ class RoomManager {
         $this->roomUpdate($roomId, $responseResult);
 
         $this->userUpdate($userId, $userEloChange);
+
+        unset($this->rooms[$roomId]['users'][$userId]);
     }
 
     public function ready($userId, $opponentId, $roomId) {
@@ -164,37 +234,60 @@ class RoomManager {
         $notification = null;
         if ($action == "Bắt đầu") {
             $notification = "Trận đầu bắt đầu";
+            $this->rooms[$roomId]['turn_playing'] = 1;
+            $this->rooms[$roomId]['timer'] = time() + 20;
+            $this->rooms[$roomId]['moves'] = '';
+            $this->rooms[$roomId]['areas'] = [];
+            $this->rooms[$roomId]['player'] = [
+                'moveCount' => 0,
+                'score' => 0
+            ];
+            $this->rooms[$roomId]['opponent'] = [
+                'moveCount' => 0,
+                'score' => 0
+            ];
         }
 
         $this->roomUpdate($roomId, null, $notification, $action);
     }
 
-    public function updateMoves($roomId, $moves, $userId, $captureOpponentsCount, $actionRoom, $notification = null) {
-        $url = $this->apiHost . '/api/update_moves.php';
-
-        $data = array(
-            'userId' => $userId,
-            'roomId' => $roomId,
-            'moves' => $moves
-        );
-
-        if ($actionRoom) {
-            $data['action'] = $actionRoom;
+    public function updateMoves($roomId, $data, $notification = null) {
+        $this->rooms[$roomId]['timer'] = time() + 20;
+        $data['timer'] = $this->rooms[$roomId]['timer'];
+        if (isset($data['turnPlaying'])) {
+            $this->rooms[$roomId]['turn_playing'] = $data['turnPlaying'];
         }
 
-        if ($captureOpponentsCount) {
-            $data['captureOpponentsCount'] = $captureOpponentsCount;
+        if (isset($data['moves'])) {
+            $this->rooms[$roomId]['moves'] = $data['moves'];
         }
 
-        $response = $this->myCurl->postRequest($url, $data);
-
-        if ($actionRoom != 'giveWay') {
-            $action = "move";
-        } else {
-            $action = null;
+        if (isset($data['areas'])) {
+            $this->rooms[$roomId]['areas'] = $data['areas'];
         }
 
-        $this->roomUpdate($data['roomId'], null, $notification, $action);
+        if (isset($data['player'])) {
+            $this->rooms[$roomId]['player'] = $data['player'];
+        }
+
+        if (isset($data['opponent'])) {
+            $this->rooms[$roomId]['opponent'] = $data['opponent'];
+        }
+
+
+
+        if ($this->rooms[$roomId]['users']) {
+            foreach($this->rooms[$roomId]['users'] as $userIdInArr => $userData) {
+                if (isset($this->clients[$userIdInArr])) {
+                    $client = $this->clients[$userIdInArr];
+                    $client->send(json_encode($data));
+
+                    if ($notification) {
+                        $client->send(json_encode(['action' => 'notification', 'notification' => $notification]));
+                    }
+                }
+            }
+        }
     }
 
     public function surrender($userId, $roomId, $notification) {

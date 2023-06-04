@@ -12,13 +12,14 @@ class MyWebSocket implements MessageComponentInterface {
     protected $rooms = [];
     protected $roomManager;
 
+    public $interval;
+
     public function __construct() {
         $this->roomManager = new RoomManager();
     }
 
     public function onOpen(ConnectionInterface $conn) {
-        // Khởi tạo kết nối
-        // Thêm client vào danh sách kết nối
+        
         
     }
 
@@ -57,10 +58,8 @@ class MyWebSocket implements MessageComponentInterface {
                 break;
             case 'getServerTime':
                 $userId = $data['userId'];
-                $timeServer = time();
-                $timeData = ['action' => 'timeServerUpdate', 'timeServer' => $timeServer];
-                $client = $this->clients[$userId];
-                $client->send(json_encode($timeData));
+                $this->roomManager->getServerTime($userId);
+                
                 break;
             case 'checkRoom':
                 $userId = $data['userId'];
@@ -90,15 +89,11 @@ class MyWebSocket implements MessageComponentInterface {
                 break;
             case 'updateMoves':
                 $roomId = $data['roomId'];
-                $moves = $data['moves'];
-                $userId = $data['userId'];
 
-                $captureOpponentsCount = isset($data['captureOpponentsCount']) ? $data['captureOpponentsCount'] : null;
-                $actionRoom = isset($data['actionRoom']) ? $data['actionRoom'] : null;
-                $notification = isset($data['notification']) ? $data['notification'] : null;
-
-                $this->roomManager->updateMoves($roomId, $moves, $userId, $captureOpponentsCount, $actionRoom, $notification);
-
+                $notification = null;
+                if(isset($data['notification'])) $notification = $data['notification'];
+                
+                $this->roomManager->updateMoves($roomId, $data, $notification);
                 break;
             case 'surrender':
                 $userId = $data['userId'];
@@ -159,6 +154,12 @@ class MyWebSocket implements MessageComponentInterface {
                 $client = $this->clients[$opponentId];
                 $client->send(json_encode($data));
                 break;
+            case 'getTurnPlaying':
+                $userId = $data['userId'];
+                $roomId = $data['roomId'];
+                $this->roomManager->getTurnPlaying($userId, $roomId);
+                break;
+
             // Xử lý các sự kiện khác tại đây
             default:
                 // Xử lý sự kiện không được nhận dạng

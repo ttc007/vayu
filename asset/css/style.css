@@ -329,7 +329,7 @@ h1 {
 .opponent-score-container {
   float:right;
   padding:15px 5px;
-  margin-top:20px;
+  margin-top:10px;
 }
 
 .popup {
@@ -494,7 +494,7 @@ h1 {
   border-radius: 5px;
   width: 32px;
   height: 32px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .opponent-content-info img, .play-content-info img {
@@ -542,7 +542,7 @@ h1 {
   border-radius: 5px;
   width: 32px;
   height: 32px;
-  margin-top:20px;
+  margin-top:10px;
 }
 
 .result-request:hover {

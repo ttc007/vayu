@@ -1,0 +1,116 @@
+https://support.trumvps.vn/viewinvoice.php?id=16115
+
+ssh-keygen -t rsa -C "truongthanhcong1909@gmail.com"
+cat ~/.ssh/id_rsa.pub
+
+vi /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-enabled/000-default.conf
+
+sudo a2ensite 000-default.conf
+sudo service apache2 restart
+sudo apache2ctl configtest
+
+sudo service mysql status
+sudo mysql
+sudo mysql_secure_installation
+
+docker run -it -v D:/xampp/htdocs/Light/Vayugovn/vayu/nodeJs:app ubuntu:20.04 /bin/bash -p 3000:3000
+docker run -it -v D:/xampp/htdocs/Light/Vayugovn/vayu/nodeJs:app ubuntu:20.04 /bin/bash -p 80:80
+
+apt-get update
+apt-get install vim
+mkdir my-docker-image
+cd my-docker-image
+touch Dockerfile
+vi Dockerfile
+apt-get install -y nodejs mysql-server
+npm install socket.io express mysql http --save
+
+docker exec -it 99e6fa7a7a1762efb2bd90d5a9d408953e44f3aab5bbf3f1a55a904bd8f6cd19 /bin/bash 
+docker exec -it 99e6fa7a7a1762efb2bd90d5a9d408953e44f3aab5bbf3f1a55a904bd8f6cd19 /etc/init.d/mysql start
+docker exec -it 99e6fa7a7a1762efb2bd90d5a9d408953e44f3aab5bbf3f1a55a904bd8f6cd19 mysql -u root
+mysql -u root covay < covay.sql
+
+apt-get update
+apt-get install -y apache2 php libapache2-mod-php
+vi /etc/apache2/sites-available/myapp.conf
+<VirtualHost *:80>
+    DocumentRoot /var/www/html
+    <Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+a2ensite myapp.conf
+service apache2 restart
+
+service apache2 status
+
+//Commit container tạo image
+docker commit 99e6fa7a7a1762efb2bd90d5a9d408953e44f3aab5bbf3f1a55a904bd8f6cd19 my-docer-image
+
+////Dockerfile
+FROM ubuntu:20.04
+
+# Cài đặt các gói phụ thuộc cần thiết (nodejs, apache, mysql, ...)
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    apache2 \
+    mysql-server \
+    npm
+
+# Sao chép file server.js vào container
+MRDIR app
+COPY server.js /app/server.js
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+
+RUN npm install socket.io express mysql http --save
+
+# Lắng nghe cổng 3000 bằng ứng dụng Node.js
+EXPOSE 3000
+EXPOSE 80
+
+# Cấu hình và khởi động các dịch vụ
+CMD service apache2 start && service mysql start && node /app/server.js
+////// Kết thúc :wq
+
+//Để xây dựng image từ Dockerfile, chạy lệnh sau trong thư mục chứa Dockerfile:
+docker build -t my-docker-image .
+docker build --no-cache -t my-docker-image .
+
+docker run -it -v -p 3000:3000 80:80 D:/xampp/htdocs/Light/Vayugovn/vayu/nodeJs/docker:app my-docker-image
+docker run -it -v -p 80:80 D:/xampp/htdocs/Light/Vayugovn/vayu:var/www/html ubuntu:20.04
+
+docker run -it -v D:/xampp/htdocs/Light/Vayugovn/vayu:/var/www/html -p 80:80 ubuntu:20.04
+
+
+docker ps
+docker exec -it 99e6fa7a7a1762efb2bd90d5a9d408953e44f3aab5bbf3f1a55a904bd8f6cd19 /bin/bash
+docker commit 99e6fa7a7a1762efb2bd90d5a9d408953e44f3aab5bbf3f1a55a904bd8f6cd19 my-docker-image
+
+ service mysql start &
+ node server.js &
+
+mysql -u root -e "SELECT VERSION();"
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Thanhcong007!@#';
+
+docker run -d --name=mysql-container -p 3306:3306 -e MYSQL_ROOT_PASSWORD=Thanhcong007!@# -v D:/xampp/htdocs/Light/Vayugovn/mysql:/var/lib/mysql mysql:latest
+
+docker exec -it mysql-container mysql -u root -p
+mysql -u root -p covay < covay.sql
+
+CREATE USER 'congtt'@'localhost' IDENTIFIED BY 'Thanhcong007!@#';
+CREATE USER 'congtt'@'%' IDENTIFIED BY 'Thanhcong007!@#';
+ALTER USER 'congtt'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Thanhcong007!@#';
+ALTER USER 'congtt'@'%' IDENTIFIED WITH mysql_native_password BY 'Thanhcong007!@#';
+GRANT ALL PRIVILEGES ON *.* TO 'congtt'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'congtt'@'localhost' WITH GRANT OPTION;
+
+FLUSH PRIVILEGES;
+
+SHOW GRANTS FOR 'congtt'@'localhost';
+
+CREATE USER 'user1'@'localhost' IDENTIFIED BY '123456';
+CREATE USER 'user1'@'%' IDENTIFIED BY '123456';
+
+CREATE USER 'user2'@'localhost' IDENTIFIED BY '';

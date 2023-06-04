@@ -37,7 +37,8 @@ Vue.component('room-component', {
     'is_opponent_wait_ready',
     'opponent_wait_ready_time',
 
-    'is_get_dicken'
+    'is_get_dicken',
+    'areas'
     ],
   template: `
     <div class="canvas-wrapper game-container" id="canvas-wrapper">
@@ -87,7 +88,7 @@ Vue.component('room-component', {
                 v-if='player_color == turn_playing'></button>
               <button class="result-request" 
                 @click="showCheckResultPopup" title="Yêu cầu tính điểm" 
-                v-if='player_color == turn_playing'>
+                v-if='player_color == turn_playing && player_move_count > 50'>
               </button>
             </div>
           </div>
@@ -159,7 +160,7 @@ Vue.component('room-component', {
                 v-if='opponent_color == turn_playing'>
               </button>
               <button class="result-request" @click="showCheckResultPopup" title="Yêu cầu tính điểm"  
-                v-if='opponent_color == turn_playing'>
+                v-if='opponent_color == turn_playing && opponent_move_count > 50'>
               </button>
             </div>
           </div>
@@ -268,7 +269,7 @@ Vue.component('room-component', {
       win:null,
       lost:null,
       isDicken:false,
-      resultTitle:null
+      resultTitle:null,
     };
   },
   created() {
@@ -329,10 +330,7 @@ Vue.component('room-component', {
       }, 1000);
     },
     moves(newVal, oldVal) {
-      // Kiểm tra nếu lượt đánh thay đổi, vẽ lại bàn cờ
-      if (this.moves == '') {
-        this.moves = "[]";
-      }
+      this.drawBoard();
     },
     notification(newVal, oldVal) {
       if (newVal !== oldVal && newVal != '') {
@@ -492,7 +490,10 @@ Vue.component('room-component', {
         }
       }
 
-      var moves = (this.moves == '') ? [] : JSON.parse(this.moves);
+      var moves;
+
+      if (this.moves == '' || !this.moves) moves = [];
+      else moves = JSON.parse(this.moves);
       // Vẽ quân cờ
       if (moves) {
         for (var i = 0; i < moves.length; i++) {
@@ -583,8 +584,9 @@ Vue.component('room-component', {
             
             var currentPlayer = this.user_color;
 
-            if (this.moves == '') this.moves = '[]';
-            var moves = JSON.parse(this.moves);
+            var moves;
+            if (this.moves == '' || !this.moves) moves = [];
+            else moves = JSON.parse(this.moves);
             // Lưu nước đi vào mảng
             moves.push({ row: row, col: col, player: currentPlayer });
 
@@ -598,7 +600,7 @@ Vue.component('room-component', {
     },
     isPositionOccupied(col, row, moves = null) {
       if (moves == null) {
-        if (this.moves == '') moves = [];
+        if (this.moves == '' || !this.moves) moves = [];
         else moves = JSON.parse(this.moves);
       }
 
@@ -664,7 +666,9 @@ Vue.component('room-component', {
       }
     },
     isPositionOccupiedByAlly(col, row, color) {
-      var moves = JSON.parse(this.moves);
+      var moves;
+      if (this.moves == '' || !this.moves) moves = [];
+      else moves = JSON.parse(this.moves);
 
       for (var i = 0; i < moves.length; i++) {
         var move = moves[i];
@@ -692,7 +696,7 @@ Vue.component('room-component', {
     },
     hasAir(col, row, excludedPoint = null, areaCheck = {}) {
       var directions = this.getDirections(col, row);
-
+      
       for (var i = 0; i < directions.length; i++) {
         var direction = directions[i];
         var nextMove = this.getNextMove(col, row, direction);
@@ -758,7 +762,9 @@ Vue.component('room-component', {
     },
     getCaptureOpponents(col, row) {
       var directions = this.getDirections(col, row);
-      var moves = JSON.parse(this.moves);
+      var moves;
+      if (this.moves == '' || !this.moves) moves = [];
+      else moves = JSON.parse(this.moves);
       moves.push({col:col, row:row, player: this.user_color});
       var data = {connectedOpponents:{}}
       data.moves = moves;
@@ -784,6 +790,54 @@ Vue.component('room-component', {
 
       return data.connectedOpponents;
     },
+    checkCommonElements(arr1, arr2) {
+      for (let element1 of arr1) {
+        for (let element2 of arr2) {
+          if (isEqual(element1, element2)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+    mergeArraysRecursive(areasColor) {
+      if (areasColor.length === 1) {
+        return areasColor;
+      }
+
+      var areaMerge = {};
+      let hasCommon = false;
+
+      for (let i = 0; i < areasColor.length - 1; i++) {
+        const area = areasColor[i];
+
+        for (let j = i + 1; j < areasColor.length; j++) {
+          const areaNext = areasColor[j];
+
+          for (key in area) {
+            if (areaNext[key]) {
+              hasCommon = true;
+              areaMerge =  Object.assign({}, area, areaNext);
+              break;
+            }
+          }
+
+          if (hasCommon) {
+            areasColor.splice(j, 1); // Xóa nextArray khỏi arr
+            areasColor[i] = areaMerge; // Đánh dấu currentArray là null để xóa sau
+            break;
+          }
+        }
+
+        if (hasCommon) {
+          break;
+        }
+      }
+
+      if (hasCommon) {
+        this.mergeArraysRecursive(areasColor);
+      }
+    },
     captureOpponents(col, row, moves) {
       var roomId = this.room_id;
       var userId = this.user_id;
@@ -799,13 +853,75 @@ Vue.component('room-component', {
       var captureOpponentsCount = capturedOpponents.length;
       var moves = JSON.stringify(moves);
       // Gọi api update move
+      var turnPlaying = this.turn_playing == 1 ? 2 : 1;
+
+      var player, opponent;
+      if (this.user_id == this.player_id) {
+        var player_move_count = this.player_move_count + 1;
+        var player_score = this.player_score + captureOpponentsCount;
+        player = {
+          moveCount: player_move_count,
+          score: player_score
+        }
+
+        opponent = {
+          moveCount: this.opponent_move_count,
+          score: this.opponent_score
+        }
+      } else {
+        var opponent_move_count = this.opponent_move_count + 1;
+        var opponent_score = this.opponent_score + captureOpponentsCount;
+        player = {
+          moveCount: this.player_move_count,
+          score: this.player_score
+        }
+
+        opponent = {
+          moveCount: opponent_move_count,
+          score: opponent_score
+        }
+      }
+
+      var areas = this.areas;
+
+      var areasColor;
+      var pointCurrent = {col:col, row:row};
+      var isPush = false;
+
+      if(areas[`${this.user_color}`]) {
+        areasColor = areas[`${this.user_color}`];
+        for (area of areasColor) {
+          for (pointString in area) {
+            const point = this.convertToMove(pointString);
+            if (this.isAdjacent(point, pointCurrent)) {
+              area[`${col}_${row}`] = true;
+              isPush = true;
+              break;
+            }
+
+          }
+        }
+      } else {
+        areasColor = [];
+      }
+
+      this.mergeArraysRecursive(areasColor);
+
+      if (!isPush) {
+        var area = {};
+        area[`${col}_${row}`] = true;
+        areasColor.push(area);
+        areas[`${this.user_color}`] = areasColor;
+      }
 
       var data = { 
         'action' : 'updateMoves',
-        roomId: roomId, 
+        roomId: roomId,
+        turnPlaying: turnPlaying,
         moves: moves, 
-        captureOpponentsCount : captureOpponentsCount, 
-        userId: userId 
+        player: player,
+        opponent: opponent,
+        areas:areas
       }
 
       socket.send(JSON.stringify(data));
@@ -817,15 +933,28 @@ Vue.component('room-component', {
 
       var notification = this.user_name + " đã nhường lượt";
 
+      var opponent = {
+        moveCount: this.player_move_count,
+        score: this.player_score
+      }
+
+      var player = {
+        moveCount: this.opponent_move_count,
+        score: this.opponent_score
+      }
+
+      var turnPlaying = this.turn_playing == 1 ? 2 : 1;
+
       var data = { 
         'action' : 'updateMoves',
-        roomId: roomId, 
+        roomId: roomId,
+        turnPlaying: turnPlaying,
         moves: moves, 
-        userId: userId, 
-        'actionRoom' : 'giveWay',
-        notification: notification
+        player: player,
+        opponent: opponent,
+        notification:notification 
       }
-      
+
       socket.send(JSON.stringify(data));
     },
     isAreaContained(innerPoints, opponentInnerPoints) {
@@ -842,10 +971,27 @@ Vue.component('room-component', {
       return true;
     },
     checkResult() {
-      var areas = this.getAreas();
+      var areas = this.areas;
 
-      var areasUnique1 = areas[1];
-      var areasUnique2 = areas[2];
+      var areas1 = areas[1];
+      var areasUnique1 = {}
+      for (key in areas1) {
+        var area = areas1[key];
+        areasUnique1[`${JSON.stringify(area)}`] = true;
+      }
+
+      var areas2 = areas[2];
+      var areasUnique2 = {}
+      for (key in areas2) {
+        var area = areas2[key];
+        areasUnique2[`${JSON.stringify(area)}`] = true;
+      }
+
+      areasUnique1 = this.validArea(areasUnique1);
+      areasUnique2 = this.validArea(areasUnique2);
+
+      areasUnique1 = this.removeNestedAreas(areasUnique1);
+      areasUnique2 = this.removeNestedAreas(areasUnique2);
 
       if (this.player_color == 1) {
         var score1 = this.player_score;
@@ -1118,71 +1264,78 @@ Vue.component('room-component', {
 
       return adjacentDirections[direction1].includes(direction2);
     },
-    getLines(area, includesPoints) {
+    getLines(area, includesPoints, firstPoint, lastPoints) {
       var keys = Object.keys(area);
 
       var lines = {};
-      if (includesPoints.length == 0) return lines;
 
-      var firstPoint = this.convertToMove(keys[0]);
-      var lastPoint = this.convertToMove(keys[keys.length-1]);
+      for (key in lastPoints) {
+        var lastPoint = lastPoints[key];
+        if (includesPoints.length == 2) {
+          var point1 = includesPoints[0];
+          var point2 = includesPoints[1];
 
+          if (point1.col == point2.col) {
+            for (let row = 2; row <= 20; row++) {
+              lines[`${point1.col}_${row}`] = true;
+            }
 
-      if (this.isAdjacent(firstPoint, lastPoint)) {
-        return lines;
-      }
+            for (let col = point1.col == 20 ? firstPoint.col + 1 : firstPoint.col - 1; 
+               point1.col == 20 ? col < 20 : col > 2;
+               point1.col == 20 ? col++ : col--) {
+              lines[`${col}_2`] = true;
+            }
 
-      if (includesPoints.length == 2) {
-        var point1 = includesPoints[0];
-        var point2 = includesPoints[1];
+            for (let col = point1.col == 20 ? lastPoint.col + 1 : lastPoint.col - 1; 
+               point1.col == 20 ? col < 20 : col > 2;
+               point1.col == 20 ? col++ : col--) {
+              lines[`${col}_20`] = true;
+            }
+          } else if (point1.row == point2.row) {
+            for (let col = 2; col <= 20; col++) {
+              lines[`${col}_${point1.row}`] = true;
+            }
 
-        if (point1.col == point2.col) {
-          for (let row = 2; row <= 20; row++) {
-            lines[`${point1.col}_${row}`] = true;
+            for (let row = point1.row == 20 ? firstPoint.row + 1 : firstPoint.row - 1; 
+               point1.row == 20 ? row < 20 : row > 2;
+               point1.row == 20 ? row++ : row--) {
+              lines[`2_${row}`] = true;
+            }
+
+            for (let row = point1.row == 20 ? lastPoint.row + 1 : lastPoint.row - 1; 
+               point1.row == 20 ? row < 20 : row > 2;
+               point1.row == 20 ? row++ : row--) {
+              lines[`20_${row}`] = true;
+            }
+          }
+        } else if (includesPoints.length == 1) {
+          var point = includesPoints[0];
+
+          for (let row = point.row; 
+             point.row < point.rowEnd ? row < point.rowEnd : row > point.rowEnd;
+             point.row < point.rowEnd ? row++ : row--) {
+            lines[`${point.col}_${row}`] = true;
           }
 
-          for (let col = point1.col == 20 ? firstPoint.col + 1 : firstPoint.col - 1; 
-             point1.col == 20 ? col < 20 : col > 2;
-             point1.col == 20 ? col++ : col--) {
-            lines[`${col}_2`] = true;
+          for (let col = point.col; 
+             point.col < point.colEnd ? col < point.colEnd : col > point.colEnd;
+             point.col < point.colEnd ? col++ : col--) {
+            lines[`${col}_${point.row}`] = true;
           }
-
-          for (let col = point1.col == 20 ? lastPoint.col + 1 : lastPoint.col - 1; 
-             point1.col == 20 ? col < 20 : col > 2;
-             point1.col == 20 ? col++ : col--) {
-            lines[`${col}_20`] = true;
+        } else {
+          if (lastPoint.col == firstPoint.col) {
+            for (let row = firstPoint.row; 
+               firstPoint.row < lastPoint.row ? row < lastPoint.row : row > lastPoint.row;
+               firstPoint.row < lastPoint.row ? row++ : row--) {
+              lines[`${firstPoint.col}_${row}`] = true;
+            }
+          } else if (lastPoint.row == firstPoint.row) {
+            for (let col = firstPoint.col; 
+               firstPoint.col < lastPoint.col ? col < lastPoint.col : col > lastPoint.col;
+               firstPoint.col < lastPoint.col ? col++ : col--) {
+              lines[`${col}_${firstPoint.row}`] = true;
+            }
           }
-        } else if (point1.row == point2.row) {
-          for (let col = 2; col <= 20; col++) {
-            lines[`${col}_${point1.row}`] = true;
-          }
-
-          for (let row = point1.row == 20 ? firstPoint.row + 1 : firstPoint.row - 1; 
-             point1.row == 20 ? row < 20 : row > 2;
-             point1.row == 20 ? row++ : row--) {
-            lines[`2_${row}`] = true;
-          }
-
-          for (let row = point1.row == 20 ? lastPoint.row + 1 : lastPoint.row - 1; 
-             point1.row == 20 ? row < 20 : row > 2;
-             point1.row == 20 ? row++ : row--) {
-            lines[`20_${row}`] = true;
-          }
-        }
-      }
-      else if (includesPoints.length == 1) {
-        var point = includesPoints[0];
-
-        for (let row = point.row; 
-           point.row < point.rowEnd ? row < point.rowEnd : row > point.rowEnd;
-           point.row < point.rowEnd ? row++ : row--) {
-          lines[`${point.col}_${row}`] = true;
-        }
-
-        for (let col = point.col; 
-           point.col < point.colEnd ? col < point.colEnd : col > point.colEnd;
-           point.col < point.colEnd ? col++ : col--) {
-          lines[`${col}_${point.row}`] = true;
         }
       }
 
@@ -1194,69 +1347,62 @@ Vue.component('room-component', {
         return { col: parseInt(col), row: parseInt(row) };
       });
 
-      var firstPoint = points[0];
-      var lastPoint = points[points.length - 1];
+      var firstPoint = null;
+      var lastPoints = [];
+      var lines = {};
+      for (key in points) {
+        var point = points[key];
+        if (this.isEdgePoint(point) && !firstPoint) firstPoint = point;
+        else if (this.isEdgePoint(point)) lastPoints.push(point);
+      }
 
       var includesPoints = [];
-      if ((firstPoint.row == 2 && lastPoint.row == 20) || (lastPoint.row == 2 && firstPoint.row == 20)) {
-        if (firstPoint.col > 11 && lastPoint.col > 11) {
-          includesPoints.push({col:20, row:2});
-          includesPoints.push({col:20, row:20});
-        } else {
-          includesPoints.push({col:2, row:2});
-          includesPoints.push({col:2, row:20});
-        }
-      } else if ((firstPoint.col == 2 && lastPoint.col == 20) || (lastPoint.col == 2 && firstPoint.col == 20)) {
-        if (firstPoint.row > 11 && lastPoint.row > 11) {
-          includesPoints.push({col:2, row:20});
-          includesPoints.push({col:20, row:20});
-        } else {
-          includesPoints.push({col:2, row:2});
-          includesPoints.push({col:20, row:2});
-        }
-      } else {
-        var count = 0;
-        for (pointFor of points) {
-          if (this.isEdgePoint(pointFor) && count == 0) {
-            firstPoint = pointFor;
-            count++;
-            continue;
-          }
 
-          if (this.isEdgePoint(pointFor) && count == 1) {
-            lastPoint = pointFor;
-            count++;
-          }
-        }
-
-        var keys = Object.keys(area);
-
-        if (count == 2 && (firstPoint.col != lastPoint.col && firstPoint.row != lastPoint.row)) {
-          var point = {}
-          if (firstPoint.col == 2 || lastPoint.col == 2) {
-            point.col = 2;
-            point.colEnd = lastPoint.col == 2 ? firstPoint.col : lastPoint.col;
+      for (key in lastPoints) {
+        var lastPoint = lastPoints[key];
+        if ((firstPoint.row == 2 && lastPoint.row == 20) || (lastPoint.row == 2 && firstPoint.row == 20)) {
+          if (firstPoint.col > 11 && lastPoint.col > 11) {
+            includesPoints.push({col:20, row:2});
+            includesPoints.push({col:20, row:20});
           } else {
-            point.col = 20;
-            point.colEnd = lastPoint.col == 20 ? firstPoint.col : lastPoint.col;
+            includesPoints.push({col:2, row:2});
+            includesPoints.push({col:2, row:20});
           }
-
-          if (firstPoint.row == 2 || lastPoint.row == 2) {
-            point.row = 2;
-            point.rowEnd = lastPoint.row == 2 ? firstPoint.row : lastPoint.row;
+        } else if ((firstPoint.col == 2 && lastPoint.col == 20) || (lastPoint.col == 2 && firstPoint.col == 20)) {
+          if (firstPoint.row > 11 && lastPoint.row > 11) {
+            includesPoints.push({col:2, row:20});
+            includesPoints.push({col:20, row:20});
           } else {
-            point.row = 20;
-            point.rowEnd = lastPoint.row == 20 ? firstPoint.row : lastPoint.row;
+            includesPoints.push({col:2, row:2});
+            includesPoints.push({col:20, row:2});
           }
+        } else {
+          var keys = Object.keys(area);
 
-          includesPoints.push(point);
+          if (firstPoint.col != lastPoint.col && firstPoint.row != lastPoint.row) {
+            var point = {}
+            if (firstPoint.col == 2 || lastPoint.col == 2) {
+              point.col = 2;
+              point.colEnd = lastPoint.col == 2 ? firstPoint.col : lastPoint.col;
+            } else {
+              point.col = 20;
+              point.colEnd = lastPoint.col == 20 ? firstPoint.col : lastPoint.col;
+            }
+
+            if (firstPoint.row == 2 || lastPoint.row == 2) {
+              point.row = 2;
+              point.rowEnd = lastPoint.row == 2 ? firstPoint.row : lastPoint.row;
+            } else {
+              point.row = 20;
+              point.rowEnd = lastPoint.row == 20 ? firstPoint.row : lastPoint.row;
+            }
+
+            includesPoints.push(point);
+          }
         }
       }
 
-      var lines = {};
-      if (!this.isAdjacent(firstPoint, lastPoint)) {
-        lines = this.getLines(area, includesPoints);
-      }
+      lines = this.getLines(area, includesPoints, firstPoint, lastPoints);
 
       const allPoints = [...points, ...includesPoints];
 
@@ -1328,6 +1474,31 @@ Vue.component('room-component', {
 
       return innerPositions;
     },
+    removePointValid(points) {
+      for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        var count = 0;
+
+        if (this.isEdgePoint(point)) continue;
+
+
+        for (let j = 0; j < points.length; j++) {
+          if (i === j) continue;
+
+          const point1 = points[j];
+
+          if (this.isAdjacent(point, point1)) {
+            count++;
+          }
+        }
+
+        if (count < 2) {
+          points.splice(i, 1);
+          this.removePointValid(points);
+          break;
+        }
+      }
+    },
     validArea(areasUnique) {
       var validArea = {}
 
@@ -1337,34 +1508,21 @@ Vue.component('room-component', {
         // Lấy danh sách các điểm trong khu vực (area)
         var keys = Object.keys(area);
 
-        const points = Object.keys(area).map(pointString => {
+        var points = Object.keys(area).map(pointString => {
         const [col, row] = pointString.split('_');
           return { col: parseInt(col), row: parseInt(row) };
         });
 
-        var firstPoint = points[0];
-        var lastPoint = points[points.length - 1];
+        this.removePointValid(points);
 
-        var count = 0;
-        for (pointFor of points) {
-          if (this.isEdgePoint(pointFor) && count == 0) {
-            firstPoint = pointFor;
-            count++;
-            continue;
+        if (points.length > 1) {
+          var areaValid = {};
+          for (point of points) {
+            areaValid[`${point.col}_${point.row}`] = true;
           }
+          var areaValidString = JSON.stringify(areaValid);
 
-          if (this.isEdgePoint(pointFor) && count == 1) {
-            lastPoint = pointFor;
-            count++;
-          }
-        }
-
-        if (count == 2) {
-          validArea[areaString] = this.getInnerPositions(area);
-        }
-
-        if (this.isAdjacent(firstPoint, lastPoint) && !validArea[areaString]) {
-          validArea[areaString] = this.getInnerPositions(area);
+          validArea[areaValidString] = this.getInnerPositions(areaValid);
         }
       }
 

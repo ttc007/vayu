@@ -56,65 +56,66 @@ try {
 		<!-- Sử dụng các component trong template -->
 		<input type="hidden" id='userId' value="<?php echo $user['id']; ?>">
 		<input type="hidden" id='roomId' value="<?php echo $roomId; ?>">
-	  <index-component v-if="roomId==0"
-	  	:user_name="userName" 
-	  	:user_elo="userElo" 
-	  	:user_id="userId"
-	  	@show_room="showRoom"
-	  	@set_clicked="setClicked"
-	  	:is_popup_visible="isPopupListRoomVisible"
-	  	:list_room_playing="listRoomPlaying"
-	  	:user_elo_change="userEloChange"
-	  	@close_list_room="closeListRoom"
-  	></index-component>
+	    <index-component v-if="roomId==0"
+		  	:user_name="userName" 
+		  	:user_elo="userElo" 
+		  	:user_id="userId"
+		  	@show_room="showRoom"
+		  	@set_clicked="setClicked"
+		  	:is_popup_visible="isPopupListRoomVisible"
+		  	:list_room_playing="listRoomPlaying"
+		  	:user_elo_change="userEloChange"
+		  	@close_list_room="closeListRoom"
+	  	></index-component>
 
-  	<room-component v-if="roomId>0"
-	  	:user_name="userName" 
-	  	:user_elo="userElo" 
-	  	:user_id="userId"
-	  	:user_status='userStatus'
-	  	:user_color="userColor"
+	  	<room-component v-if="roomId>0"
+		  	:user_name="userName" 
+		  	:user_elo="userElo" 
+		  	:user_id="userId"
+		  	:user_status='userStatus'
+		  	:user_color="userColor"
 
-	  	:player_name="playerName" 
-	  	:player_elo="playerElo" 
-	  	:player_id="playerId"
-	  	:player_status='playerStatus'
-	  	:player_color="playerColor"
-	  	:player_score='playerScore'
-	  	:player_move_count='playerMoveCount'
+		  	:player_name="playerName" 
+		  	:player_elo="playerElo" 
+		  	:player_id="playerId"
+		  	:player_status='playerStatus'
+		  	:player_color="playerColor"
+		  	:player_score='playerScore'
+		  	:player_move_count='playerMoveCount'
 
-	  	:opponent_name="opponentName" 
-	  	:opponent_elo="opponentElo" 
-	  	:room_status="roomStatus"
-	  	:opponent_status="opponentStatus"
-	  	:opponent_id = "opponentId"
-	  	:opponent_color="opponentColor"
-	  	:opponent_score='opponentScore'
-	  	:opponent_move_count='opponentMoveCount'
+		  	:opponent_name="opponentName" 
+		  	:opponent_elo="opponentElo" 
+		  	:room_status="roomStatus"
+		  	:opponent_status="opponentStatus"
+		  	:opponent_id = "opponentId"
+		  	:opponent_color="opponentColor"
+		  	:opponent_score='opponentScore'
+		  	:opponent_move_count='opponentMoveCount'
 
-	  	:room_id="roomId"
-	  	:turn_playing="turnPlaying"
-	  	:timer="timer"
-	  	:time_server='timeServer'
-	  	:moves='moves'
-	  	:notification='notification'
-	  	:messages='messages'
-	  	@show_index="showIndex"
-	  	@room_users='roomUsers'
-	  	@set_clicked="setClicked"
-	  	:opponent_elo_change="opponentEloChange"
-    	:player_elo_change="playerEloChange"
-    	:is_get_request_result="isGetRequestResult"
-    	@close_get_request_result="closeGetRequestResult"
-    	:is_result="isResult"
-    	:response_result="responseResult"
-    	@close_result="closeResult"
-    	@start_wait_interval="startWaitInterval"
-    	:is_opponent_wait_ready="isOpponentWaitReady"
-    	:opponent_wait_ready_time="opponentWaitReadyTime"
-    	:is_get_dicken="isGetDicken"
-    	@close_get_dicken="closeGetDicken"
-  	></room-component>
+		  	:room_id="roomId"
+		  	:turn_playing="turnPlaying"
+		  	:timer="timer"
+		  	:time_server='timeServer'
+		  	:moves='moves'
+		  	:notification='notification'
+		  	:messages='messages'
+		  	@show_index="showIndex"
+		  	@room_users='roomUsers'
+		  	@set_clicked="setClicked"
+		  	:opponent_elo_change="opponentEloChange"
+	    	:player_elo_change="playerEloChange"
+	    	:is_get_request_result="isGetRequestResult"
+	    	@close_get_request_result="closeGetRequestResult"
+	    	:is_result="isResult"
+	    	:response_result="responseResult"
+	    	@close_result="closeResult"
+	    	@start_wait_interval="startWaitInterval"
+	    	:is_opponent_wait_ready="isOpponentWaitReady"
+	    	:opponent_wait_ready_time="opponentWaitReadyTime"
+	    	:is_get_dicken="isGetDicken"
+	    	@close_get_dicken="closeGetDicken"
+	    	:areas="areas"
+	  	></room-component>
 	</div>
 
   <script src="asset/js/component/indexComponent.js"></script>

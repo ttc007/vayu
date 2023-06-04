@@ -4,6 +4,8 @@ require '../connectDB.php';
 $userId = $_POST["userId"];
 $userElo = $_POST['userElo'];
 
+$color = 1;
+
 try {
 
     // Truy vấn dữ liệu từ bảng "user"
@@ -72,7 +74,7 @@ try {
 
         $conn = null;
 
-        echo json_encode(['roomId'=>$roomId]);
+        echo json_encode(['roomId'=>$roomId, 'color' => $color]);
     }
 
 } catch (PDOException $e) {

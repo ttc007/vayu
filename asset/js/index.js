@@ -7,6 +7,7 @@ socket.onopen = function() {
   socket.send(JSON.stringify({ action: 'updateConn', userId: userId }));
   socket.send(JSON.stringify({ action: 'roomUpdate', roomId: roomId }));
   socket.send(JSON.stringify({ action: 'getUserUpdate', userId: userId }));
+  socket.send(JSON.stringify({ action: 'getTurnPlaying', userId: userId, roomId: roomId }));
 };
 
 socket.onclose = function(event) {};
@@ -74,18 +75,36 @@ new Vue({
 			opponentWaitReadyTime:null,
 
 			isGetDicken:false,
+			areas:{}
     },
     mounted() {
     	socket.onmessage = (event) => {
 	      var message = event.data;
 	      var jsonData = JSON.parse(message);
+
 	      switch (jsonData.action) {
 				  case 'roomUsers':
 				    this.roomUsers(jsonData, 1);
 
+				    var roomId = this.roomId;
+				    var userId = this.userId;
+
 			    	if (jsonData.roomAction == 'Bắt đầu' && this.isUserInteracted()) {
 			    		this.batdauSound.play();
 			    		this.isOpponentWaitReady = false;
+			    		this.turnPlaying = 1;
+			    		this.moves = null;
+			    		this.areas = {};
+  						socket.send(JSON.stringify({ action: 'getTurnPlaying', userId: userId, roomId: roomId }));
+
+  						this.playerScore = 0;
+	        		this.playerMoveCount = 0;
+
+	        		this.opponentScore = 0;
+	        		this.opponentMoveCount = 0;
+
+	        		this.isOpponentWaitReady = false;
+
 			    	} else if (jsonData.roomAction == 'move' && this.isUserInteracted()) {
 			    		this.moveSound.play();
 			    	}
@@ -117,7 +136,8 @@ new Vue({
 				  case 'timeServerUpdate':
 				    this.timeServer = jsonData.timeServer;
 				    if (this.timer - this.timeServer <= 1 && this.isUserInteracted() && this.roomStatus == 'playing') {
-				    	this.tichSound.play();
+				    	// Tiếng quá to
+				    	//this.tichSound.play();
 				    }
 
 				    if (this.wait_time && this.wait_time - jsonData.timeServer <= 5) {
@@ -191,6 +211,48 @@ new Vue({
 			    	}
 			    	socket.send(JSON.stringify({ action: 'getUserUpdate', userId: userId }));
 			    	this.isOpponentWaitReady = false;
+				    break;
+				  case 'updateMoves':
+			    	this.moves = jsonData.moves;
+			    	this.playerScore = jsonData.player.score;
+			    	this.playerMoveCount = jsonData.player.moveCount;
+			    	this.opponentScore = jsonData.opponent.score;
+			    	this.opponentMoveCount = jsonData.opponent.moveCount;
+			    	this.turnPlaying = jsonData.turnPlaying;
+			    	this.timer = jsonData.timer;
+
+			    	if (this.isUserInteracted()) {
+			    		this.moveSound.play();
+			    	}
+
+			    	if (jsonData.areas) {
+			    		this.areas = jsonData.areas;
+			    	}
+
+				    break;
+			    case 'updateTurnPlaying':
+			    	this.turnPlaying = jsonData.turnPlaying;
+			    	if (jsonData.timer) this.timer = jsonData.timer;
+			    	this.timeServer = jsonData.timerServer;
+			    	this.moves = jsonData.moves;
+
+			    	if (jsonData.areas) {
+			    		this.areas = jsonData.areas;
+			    	}
+
+			    	if (jsonData.player) {
+			    		this.playerMoveCount = jsonData.player.moveCount;
+			    		this.playerScore = jsonData.player.score;
+			    	}
+
+			    	if (jsonData.opponent) {
+			    		this.opponentMoveCount = jsonData.opponent.moveCount;
+			    		this.opponentScore = jsonData.opponent.score;
+			    	}
+
+	      		if (this.roomStatus == 'playing' && !this.timerInterval) {
+	      			this.startTimer();
+	      		}
 				    break;
 				  default:
 				    // Xử lý khi không khớp với bất kỳ case nào
@@ -276,8 +338,8 @@ new Vue({
 	      this.roomId = room.id;
 
 	      this.roomStatus = room.status;
-	      this.turnPlaying = room.turn_playing;
-	      this.timer = room.timer;
+	      // this.turnPlaying = room.turn_playing;
+	      // this.timer = room.timer;
 
 	      const opponentInfo = usersArray.find(user => user.color == 1);
 	      const player = usersArray.find(user => user.color == 2);
@@ -309,8 +371,8 @@ new Vue({
 	        this.playerStatus = player.status;
 	        this.playerId = player.user_id;
 	        this.playerColor = player.color;
-	        this.playerScore = player.score;
-	        this.playerMoveCount = player.move_count;
+	        // this.playerScore = player.score;
+	        // this.playerMoveCount = player.move_count;
 	      } else {
 	        this.playerName = '';
 	        this.playerElo = '';
@@ -325,8 +387,8 @@ new Vue({
 	        this.opponentStatus = opponentInfo.status;
 	        this.opponentId = opponentInfo.user_id;
 	        this.opponentColor = opponentInfo.color;
-	        this.opponentScore = opponentInfo.score;
-	        this.opponentMoveCount = opponentInfo.move_count;
+	        // this.opponentScore = opponentInfo.score;
+	        // this.opponentMoveCount = opponentInfo.move_count;
 	      } else {
 	        this.opponentName = '';
 	        this.opponentElo = '';
@@ -340,7 +402,7 @@ new Vue({
 	      	this.userStatus = user.status;
 	      }
 
-	      if (this.roomStatus === 'playing') {
+	      if (this.roomStatus === 'playing' && this.timer) {
 		      this.startTimer();
 		    } else if (this.roomStatus === 'wait') {
 		      this.stopTimer();
@@ -350,7 +412,7 @@ new Vue({
 		   		this.tichtatSound.pause();
 		   	}
 
-		    this.moves = room.moves;
+		    // this.moves = room.moves;
 		    this.messages = room.messages;
 	    },
 	    startTimer() {
