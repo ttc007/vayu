@@ -8,6 +8,7 @@ socket.onopen = function() {
   socket.send(JSON.stringify({ action: 'roomUpdate', roomId: roomId }));
   socket.send(JSON.stringify({ action: 'getUserUpdate', userId: userId }));
   socket.send(JSON.stringify({ action: 'getTurnPlaying', userId: userId, roomId: roomId }));
+  console.log("Connected socket");
 };
 
 socket.onclose = function(event) {};

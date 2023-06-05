@@ -779,6 +779,7 @@ Vue.component('room-component', {
           if (!data.connectedOpponents[nextMove.col + '_' + nextMove.row]) {
             data.connectedOpponents[nextMove.col + '_' + nextMove.row] = direction;
             data.direction = direction;
+            data.excludeDirection = this.getExcludeDirection(direction);
             if (this.hasAirOpponent(nextMove.col, nextMove.row, data)) {
               data.connectedOpponents = Object.fromEntries(
                 Object.entries(data.connectedOpponents).filter(([key, value]) => value !== direction)
@@ -912,6 +913,15 @@ Vue.component('room-component', {
         area[`${col}_${row}`] = true;
         areasColor.push(area);
         areas[`${this.user_color}`] = areasColor;
+      }
+
+      var opponent_color = this.getOpponentColor();
+      var opponent_areas = areas[opponent_color];
+      for (area of opponent_areas) {
+        for (var i = 0; i < capturedOpponents.length; i++) {
+          var position = capturedOpponents[i];
+          delete area[position];
+        }
       }
 
       var data = { 
@@ -1056,7 +1066,7 @@ Vue.component('room-component', {
         action: 'resultRoom'
       }
 
-      socket.send(JSON.stringify(data));
+      // socket.send(JSON.stringify(data));
       this.$emit('close_get_request_result');
     },
     getMove(col, row) {

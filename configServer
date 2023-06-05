@@ -2,6 +2,12 @@ http://103.188.166.50/
 
 Thanhcong007!@#
 
+ps aux | grep server.php
+
+kill 41119
+
+nohup php server.php > server.log 2>&1 &
+
 https://support.trumvps.vn/viewinvoice.php?id=16115
 
 ssh-keygen -t rsa -C "truongthanhcong1909@gmail.com"
